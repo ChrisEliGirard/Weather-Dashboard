@@ -22,7 +22,7 @@ const displayHistory = () => {
 
 // Function to get the City Coords
 const getWeatherPosition = async (cityName) => {
-  await fetch(`http://api.openweathermap.org/geo/1.0/direct?q=${cityName}&limit=1&appid=${apiKey}`)
+  await fetch(`https://api.openweathermap.org/geo/1.0/direct?q=${cityName}&limit=1&appid=${apiKey}`)
   .then(response => {return response.json()})
   .then(data => {
     currentCity = data[0].name
