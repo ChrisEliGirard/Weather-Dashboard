@@ -20,12 +20,23 @@ const displayHistory = () => {
   historyEl.innerHTML = searchHistory.map((search) => {`<p>${search}<p>`});
 };
 
+// Writing Search to local storage
+const saveSearch = (x) => {
+  localStorage['currentCity'] = x;
+};
+
+const getSavedSearch = () => {
+  currentCity = localStorage['currentCity'] || 'Orlando';
+  getWeatherPosition(currentCity);
+};
+
 // Function to get the City Coords
 const getWeatherPosition = async (cityName) => {
   await fetch(`https://api.openweathermap.org/geo/1.0/direct?q=${cityName}&limit=1&appid=${apiKey}`)
   .then(response => {return response.json()})
   .then(data => {
     currentCity = data[0].name
+    saveSearch(currentCity);
     getForecast(data);
     getFiveDayForecast(data);
   }).catch((err) => {console.log(err)});
@@ -42,18 +53,22 @@ const getForecast = (data) => {
     let { temp, humidity } = data.main;
     let windSpeed = data.wind.speed;
     console.log(currentCity, icon, temp, humidity, windSpeed);
-    weatherCard.innerHTML = ''
-    weatherCard.innerHTML =
-      ` <div class="card-header" id="weather-type">
-          <img class="card-img-top" id="weather-icon" src='https://openweathermap.org/img/wn/${icon}.png' alt="..." />
-          <h3 class="card-title" id="weather-temp">${temp}°</h3>
-          <h4 class="card-subtitle" id="weather-city">${currentCity}</h4>
-          <p class='card-subtitle' id='weather-wind'>Wind: ${windSpeed} mph</p>
-          <p class="card-title" id="weather-humidity">Humidity: ${humidity}%</p>
-          <p class="card-subtitle" id="date"></p>
-        </div>
-      `
+    displayForecast(icon, temp, currentCity, windSpeed, humidity);
 })};
+
+const displayForecast = (icon, temp, currentCity, windSpeed, humidity) => {
+  weatherCard.innerHTML = ''
+  weatherCard.innerHTML =
+    ` <div class='image-container'>
+        <img class="card-img-top" id="weather-icon" src='https://openweathermap.org/img/wn/${icon}.png' alt="..." />
+      </div>
+      <h3 class="card-subtitle" id="weather-temp">${temp}°</h3>
+      <h4 class="card-subtitle" id="weather-city">${currentCity}</h4>
+      <p class='card-subtitle' id='weather-wind'>Wind: ${windSpeed} mph</p>
+      <p class="card-subtitle" id="weather-humidity">Humidity: ${humidity}%</p>
+      <p class="card-subtitle" id="date"></p>
+    `
+}
 
 // Function to Get and Render the Five Day Forecast
 const getFiveDayForecast = (data) => {
@@ -66,7 +81,7 @@ const getFiveDayForecast = (data) => {
       forecastCard.innerHTML += `
         <div id="forecast" class="card" style="width: 18rem;">
           <div id="icon"  class="card-text">
-            <img src="https://openweathermap.org/img/wn/${data.list[i].weather[0].icon}.png">
+            <img id='image' src="https://openweathermap.org/img/wn/${data.list[i].weather[0].icon}.png">
           </div>
           <div class="card-body">
             <p id="date" class="card-text forecast-date">${data.list[i].dt_txt.replace("12:00:00","")}</p>
@@ -89,3 +104,5 @@ const searchSubmit = (event) => {
 
 //Event Listener for the Search Bar
 document.querySelector("#submit").addEventListener("click", searchSubmit);
+
+getSavedSearch();
